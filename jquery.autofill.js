@@ -10,13 +10,14 @@
 		var defaults={
 			value:'First Name',
 			prePopulate:'',
-			defaultTextColor:"#666",
+			defaultTextColor:"#ccc",
 			activeTextColor:"#333"};
 			
 			
 			var options=$.extend(defaults,options);
 			return this.each(function(){
 				var obj=$(this);
+				var value = obj.val();
 				var pfield = (obj.attr('type')=='password');
 				var p_obj = false;
 				if(pfield){
@@ -24,11 +25,19 @@
 					obj.after('<input type="text" id="'+this.id+'_autofill" class="'+$(this).attr('class')+'" />');
 					p_obj = obj;
 					obj = obj.next();
-				} 
-				
-				 obj.css({color:options.defaultTextColor})
-					.val(options.value);
-
+				}
+				if(document.activeElement != obj[0]) {
+					if (obj.val() === '') {
+						obj.css({color:options.defaultTextColor}).val(options.value);					
+					}
+				}
+				 obj.each(function() {
+					 $(this.form).submit(function() {
+					   if (obj.val() === options.value || obj.val() === options.prePopulate) {
+						   obj.val('');
+							}
+				   });
+				 });
 				 obj.focus(function(){
 						if(obj.val()==options.value){
 							if(pfield) {
@@ -36,8 +45,7 @@
 								p_obj.show()
 								.focus()
 							}
-							obj.val(options.prePopulate)
-							.css({color:options.activeTextColor});
+							obj.val(options.prePopulate).css({color:options.activeTextColor});
 						}
 					})
 					.blur(function(){
